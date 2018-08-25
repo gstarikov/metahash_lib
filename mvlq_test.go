@@ -52,8 +52,8 @@ func TestNewMVLQ(t *T) {
 		helperAppend(mvlq, c.nonce)
 		mvlq.AppendString(c.data)
 
-		if mvlq.GetData() != c.result {
-			t.Errorf("%+v result != %s", c, mvlq.GetData())
+		if z := hex.EncodeToString(mvlq.GetData()); z != c.result {
+			t.Errorf("%+v result != %s", c, z)
 		}
 	}
 }
@@ -83,7 +83,7 @@ func TestGenerateMVLQ(t *T) {
 	for _, c := range cases {
 		var bInt big.Int
 		bInt.SetString(c.value, 10)
-		b, e := GenerateMVLQ(&bInt)
+		b, e := GenerateMVLQ(&bInt, nil)
 		h := hex.EncodeToString(b.Bytes())
 		if e != nil || h != c.result {
 			t.Errorf("err -> %v, value[%s] got[%s] want[%s]", e, c.value, h, c.result)

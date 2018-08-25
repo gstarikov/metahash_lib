@@ -14,8 +14,8 @@ type metahashPublicImpV1 struct {
 	pub *ecdsa.PublicKey
 }
 
-func createPublicV1(public string) (MetahashPublic, error) {
-	b, err := hex.DecodeString(public)
+func createPublicV1(public PublicKey) (MetahashPublic, error) {
+	b, err := hex.DecodeString(string(public))
 	if err != nil {
 		return nil, err
 	}
@@ -35,19 +35,19 @@ func createPublicV1(public string) (MetahashPublic, error) {
 	}, nil
 }
 
-func (t *metahashPublicImpV1) Public() string {
+func (t *metahashPublicImpV1) Public() PublicKey {
 	x509EncodedPub, _ := x509.MarshalPKIXPublicKey(t.pub)
-	return hex.EncodeToString(x509EncodedPub)
+	return PublicKey(hex.EncodeToString(x509EncodedPub))
 }
 
-func (t *metahashPublicImpV1) Address() string {
+func (t *metahashPublicImpV1) Address() Address {
 	return ""
 }
 
-func (t *metahashPublicImpV1) Veriff(data []byte, sign string) (bool, error) {
+func (t *metahashPublicImpV1) Veriff(data []byte, sign Sign) (bool, error) {
 	digest := sha256.Sum256(data)
 
-	decoded, err := hex.DecodeString(sign)
+	decoded, err := hex.DecodeString(string(sign))
 	if err != nil {
 		return false, err
 	}

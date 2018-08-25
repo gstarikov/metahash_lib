@@ -29,8 +29,8 @@ func newKeyV1() (MetahashKey, error) {
 
 }
 
-func createKeyV1(private string) (MetahashKey, error) {
-	decoded, err := hex.DecodeString(private)
+func createKeyV1(private PrivateKey) (MetahashKey, error) {
+	decoded, err := hex.DecodeString(string(private))
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +43,11 @@ func createKeyV1(private string) (MetahashKey, error) {
 	}, nil
 }
 
-func (t *metahashKeyImpV1) Private() string {
+func (t *metahashKeyImpV1) Private() PrivateKey {
 	x509EncodedPriv, _ := x509.MarshalECPrivateKey(t.priv)
-	return hex.EncodeToString(x509EncodedPriv)
+	return PrivateKey(hex.EncodeToString(x509EncodedPriv))
 }
-func (t *metahashKeyImpV1) Public() string {
+func (t *metahashKeyImpV1) Public() PublicKey {
 	return (&metahashPublicImpV1{pub: &t.priv.PublicKey}).Public()
 }
 
@@ -55,7 +55,7 @@ type ecdsaSignature struct {
 	R, S *big.Int
 }
 
-func (t *metahashKeyImpV1) Sign(data []byte) (string, error) {
+func (t *metahashKeyImpV1) Sign(data []byte) (Sign, error) {
 	digest := sha256.Sum256(data)
 
 	r, s, err := ecdsa.Sign(rand.Reader, t.priv, digest[:])
@@ -65,13 +65,13 @@ func (t *metahashKeyImpV1) Sign(data []byte) (string, error) {
 
 	b, e := asn1.Marshal(ecdsaSignature{r, s})
 
-	return hex.EncodeToString(b), e
+	return Sign(hex.EncodeToString(b)), e
 }
 
-func (t *metahashKeyImpV1) Veriff(data []byte, sign string) (bool, error) {
+func (t *metahashKeyImpV1) Veriff(data []byte, sign Sign) (bool, error) {
 	return (&metahashPublicImpV1{pub: &t.priv.PublicKey}).Veriff(data, sign)
 }
 
-func (t *metahashKeyImpV1) Address() string {
+func (t *metahashKeyImpV1) Address() Address {
 	return (&metahashPublicImpV1{pub: &t.priv.PublicKey}).Address()
 }
